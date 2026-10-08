@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#f3f5f9;color:#1b2a4a}
+  header{position:sticky;top:0;z-index:5;background:#1b2a4a;color:#fff;padding:12px 14px}
+  header h1{font-size:17px;margin:0;display:flex;justify-content:space-between;align-items:center}
+  header small{font-weight:400;font-size:12px;opacity:.8}
+  .hbtn{background:none;border:1px solid #fff6;color:#fff;border-radius:6px;padding:4px 8px;font-size:12px;margin-left:4px}
+  .wrap{padding:12px}
+  .box{background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 3px #0001;margin-bottom:12px}
+  input{width:100%;padding:11px;border:1px solid #c9d0dc;border-radius:8px;font-size:16px;margin:6px 0}
+  .btn{width:100%;padding:12px;border:0;border-radius:8px;background:#1b2a4a;color:#fff;font-size:15px;font-weight:700;margin-top:6px}
+  .btn.sub{background:#e3e7ee;color:#1b2a4a}
+  .err{color:#b33;font-size:13px;min-height:18px;margin-top:6px}
+  .ok{color:#22663a}
+  .tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:8px}
+  .tab{flex:1;white-space:nowrap;padding:9px 6px;border:1px solid #c9d0dc;background:#fff;border-radius:8px;font-size:14px}
+  .tab.on{background:#1b2a4a;color:#fff;border-color:#1b2a4a}
+  .grp{background:#fff;border-radius:10px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 2px #0001}
+  .gh{padding:11px 12px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+  .gh .n{background:#1b2a4a;color:#fff;border-radius:10px;padding:1px 9px;font-size:12px}
+  .gb{display:none;border-top:1px solid #eef0f4}
+  .grp.open .gb{display:block}
+  .p{padding:9px 12px;border-bottom:1px solid #f0f2f6;display:flex;justify-content:space-between;gap:8px}
+  .p:last-child{border-bottom:0}
+  .p .l b{font-size:15px}.p .l i{font-style:normal;font-size:12px;color:#777;margin-left:4px}
+  .p .co{font-size:12px;color:#4a5a7a}
+  .p .r{text-align:right;font-size:12px}
+  .sc{display:inline-block;background:#eaf3ea;color:#22663a;border-radius:4px;padding:1px 6px;font-weight:700}
+  .sc.no{background:#f6e3e3;color:#a33}
+  .bd{display:inline-block;font-size:10px;border-radius:3px;padding:0 4px;margin-left:3px;background:#f2c14e}
+  .bd.q{background:#5aa3e0;color:#fff}
+  .note{font-size:11px;color:#8a6200;margin-top:2px}
+  .hide{display:none}
+  .u{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #eee;font-size:14px}
+  .u button{font-size:12px;padding:5px 8px;border-radius:6px;border:1px solid #c9d0dc;background:#fff;margin-left:4px}
+  .cnt{font-size:12px;color:#666;margin:4px 2px 8px}
+  .eb{font-size:12px;padding:4px 9px;border-radius:6px;border:1px solid #c9d0dc;background:#fff;color:#1b2a4a;margin-top:6px}
+  .bar{display:flex;gap:6px;align-items:center}
+  .bar input{flex:1}
+  .add{white-space:nowrap;padding:11px 12px;border:0;border-radius:8px;background:#1b2a4a;color:#fff;font-size:14px;font-weight:700}
+  label.f{display:block;font-size:12px;color:#4a5a7a;margin-top:8px}
+  label.f input,select{margin-top:3px}
+  select{width:100%;padding:11px;border:1px solid #c9d0dc;border-radius:8px;font-size:16px;margin:6px 0;background:#fff}
+  .chk{display:flex;align-items:center;gap:6px;font-size:14px;margin:10px 0 4px}
+  .chk input{width:auto;margin:0}
+  .row2{display:flex;gap:8px}.row2>*{flex:1}
+  .btn.del{background:#b33}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="vLogin" class="wrap">
+  <div class="box" style="margin-top:40px">
+    <h2 style="margin:0 0 10px;font-size:20px">공공건축 네트워크</h2>
+    <input id="lid" placeholder="아이디" autocomplete="username">
+    <input id="lpw" type="password" placeholder="비밀번호" autocomplete="current-password">
+    <button class="btn" onclick="doLogin()">로그인</button>
+    <div id="lerr" class="err"></div>
+  </div>
+</div>
+
+<!-- 메인 -->
+<div id="vMain" class="hide">
+  <header><h1><span>공공건축 네트워크 <small id="who"></small></span>
+    <span><button class="hbtn" onclick="show('vSet')">설정</button><button class="hbtn" onclick="doLogout()">로그아웃</button></span></h1></header>
+  <div class="wrap">
+    <div class="bar"><input id="q" placeholder="성명 · 업체 · 학교 검색" oninput="render()"><button id="addBtn" class="add hide" onclick="openEdit()">+ 추가</button></div>
+    <div class="tabs">
+      <button class="tab on" data-k="year" onclick="setTab(this)">년생</button>
+      <button class="tab" data-k="co" onclick="setTab(this)">업체</button>
+      <button class="tab" data-k="school" onclick="setTab(this)">학교</button>
+      <button class="tab" data-k="rank" onclick="setTab(this)">직급</button>
+    </div>
+    <div id="cnt" class="cnt"></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<!-- 명단 수정 -->
+<div id="vEdit" class="hide">
+  <header><h1><span id="eTitle">명단 수정</span><button class="hbtn" onclick="show('vMain')">닫기</button></h1></header>
+  <div class="wrap">
+    <div class="box">
+      <div class="row2">
+        <label class="f">업체 *<input id="e_업체" list="dlCo"></label>
+        <label class="f">성명 *<input id="e_성명"></label>
+      </div>
+      <div class="row2">
+        <label class="f">직급<input id="e_직급" list="dlRank"></label>
+        <label class="f">직책<input id="e_직책" list="dlRole" placeholder="예: 팀장"></label>
+      </div>
+      <div class="row2">
+        <label class="f">년생 * (두 자리)<input id="e_년생" inputmode="numeric" maxlength="2" placeholder="예: 76" oninput="autoZ()"></label>
+        <label class="f">띠 (자동)<input id="e_띠"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="e_빠른년생"> 빠른년생</label>
+      <label class="f">출신학교 (여러 개는 / 로 구분)<input id="e_출신학교" list="dlSc" placeholder="예: 한양대/중앙대"></label>
+      <label class="f">비고<input id="e_비고"></label>
+      <button class="btn" onclick="saveEdit()">저장</button>
+      <button id="eDel" class="btn del" onclick="delEdit()">삭제</button>
+      <button class="btn sub" onclick="show('vMain')">취소</button>
+      <div id="eerr" class="err"></div>
+    </div>
+    <div class="cnt">※ 모든 추가·수정·삭제 내역은 시트의 [수정이력]에 변경 전·후 값이 기록됩니다.</div>
+  </div>
+  <datalist id="dlCo"></datalist><datalist id="dlRank"></datalist><datalist id="dlSc"></datalist>
+  <datalist id="dlRole"><option value="팀장"><option value="파트장"></datalist>
+</div>
+
+<!-- 설정 -->
+<div id="vSet" class="hide">
+  <header><h1><span>설정</span><button class="hbtn" onclick="show('vMain')">닫기</button></h1></header>
+  <div class="wrap">
+    <div class="box">
+      <b>내 비밀번호 변경</b>
+      <input id="op" type="password" placeholder="현재 비밀번호">
+      <input id="np" type="password" placeholder="새 비밀번호 (8자 이상)">
+      <input id="np2" type="password" placeholder="새 비밀번호 확인">
+      <button class="btn" onclick="changePw()">변경</button>
+      <div id="perr" class="err"></div>
+    </div>
+    <div id="mBox" class="box hide">
+      <b>계정 관리 (마스터 전용)</b>
+      <input id="nid" placeholder="새 계정 아이디">
+      <input id="npw" type="password" placeholder="초기 비밀번호 (8자 이상)">
+      <select id="nrole"><option value="열람자">열람자 (조회만)</option><option value="편집자">편집자 (명단 수정 가능)</option></select>
+      <button class="btn" onclick="addUser()">계정 추가</button>
+      <div id="merr" class="err"></div>
+      <div id="users" style="margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let S = null, DATA = [], TAB = 'year', EDIT = null;
+const FIELDS = ['업체','성명','직급','직책','년생','띠','출신학교','비고'];
+const ZODIAC = ['쥐띠','소띠','호랑이띠','토끼띠','용띠','뱀띠','말띠','양띠','원숭이띠','닭띠','개띠','돼지띠'];
+const canEdit = () => S && (S.role === '마스터' || S.role === '편집자');
+const RANK = ['부사장','전무','상무','이사','실장','수석','책임','부장','차장','과장'];
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const run = () => google.script.run;
+const age = y => new Date().getFullYear() - (1900 + Number(y));
+
+function show(v){ ['vLogin','vMain','vSet','vEdit'].forEach(x => $(x).classList.toggle('hide', x !== v)); if (v==='vSet' && S.role==='마스터') loadUsers(); }
+
+function doLogin(){
+  $('lerr').textContent = '확인 중...';
+  run().withSuccessHandler(r => {
+    S = r; $('lpw').value = ''; $('lerr').textContent = '';
+    $('who').textContent = r.id + ' · ' + r.role;
+    $('mBox').classList.toggle('hide', r.role !== '마스터');
+    $('addBtn').classList.toggle('hide', !canEdit());
+    run().withSuccessHandler(d => { DATA = d; render(); show('vMain'); }).withFailureHandler(fail).getList(S.token);
+  }).withFailureHandler(e => $('lerr').textContent = e.message).login($('lid').value, $('lpw').value);
+}
+$('lpw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function fail(e){
+  alert(e.message);
+  if (/로그인|세션/.test(e.message)) doLogout(true);
+}
+function doLogout(local){
+  if (S && !local) run().logout(S.token);
+  S = null; DATA = []; $('list').innerHTML = ''; show('vLogin');
+}
+
+function setTab(b){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  b.classList.add('on'); TAB = b.dataset.k; render();
+}
+
+function keys(p){
+  if (TAB === 'year') return [p['년생'] + '년생 · ' + p['띠'] + ' · ' + age(p['년생']) + '세'];
+  if (TAB === 'co') return [p['업체']];
+  if (TAB === 'rank') return [p['직급']];
+  return p['출신학교'] ? p['출신학교'].split('/').map(s => s.trim()) : ['학교 미확인'];
+}
+
+function render(){
+  const q = $('q').value.trim();
+  const rows = DATA.filter(p => !q || [p['성명'],p['업체'],p['출신학교']].join(' ').includes(q));
+  const g = {};
+  rows.forEach(p => keys(p).forEach(k => (g[k] = g[k] || []).push(p)));
+  let ks = Object.keys(g);
+  if (TAB === 'year') ks.sort();
+  else if (TAB === 'rank') ks.sort((a,b) => (RANK.indexOf(a)+99)%99 - (RANK.indexOf(b)+99)%99);
+  else ks.sort((a,b) => g[b].length - g[a].length || a.localeCompare(b,'ko'));
+  $('cnt').textContent = '조회 ' + rows.length + '명 · ' + ks.length + '개 분류';
+  $('list').innerHTML = ks.map(k => {
+    const ps = g[k].sort((a,b) => a['성명'].localeCompare(b['성명'],'ko'));
+    return '<div class="grp' + (q ? ' open' : '') + '"><div class="gh" onclick="this.parentNode.classList.toggle(\'open\')">'
+      + esc(k) + '<span class="n">' + ps.length + '</span></div><div class="gb">'
+      + ps.map(card).join('') + '</div></div>';
+  }).join('');
+}
+
+function card(p){
+  const bd = (p['직책'] ? '<span class="bd">' + esc(p['직책']) + '</span>' : '')
+           + (p['빠른년생'] === 'Y' ? '<span class="bd q">빠른</span>' : '');
+  const sc = p['출신학교'] ? '<span class="sc">' + esc(p['출신학교']) + '</span>' : '<span class="sc no">미확인</span>';
+  return '<div class="p"><div class="l"><b>' + esc(p['성명']) + '</b><i>' + esc(p['직급']) + '</i>' + bd
+    + '<div class="co">' + esc(p['업체']) + ' · ' + esc(p['년생']) + '년생(' + age(p['년생']) + '세)</div>'
+    + (p['비고'] ? '<div class="note">※ ' + esc(p['비고']) + '</div>' : '')
+    + (canEdit() ? '<button class="eb" onclick="openEdit(\'' + esc(p['순번']) + '\')">수정</button>' : '')
+    + '</div><div class="r">' + sc + '</div></div>';
+}
+
+function changePw(){
+  const m = $('perr'); m.className = 'err';
+  if ($('np').value !== $('np2').value) { m.textContent = '새 비밀번호가 일치하지 않습니다.'; return; }
+  run().withSuccessHandler(() => { m.className = 'err ok'; m.textContent = '변경되었습니다.'; ['op','np','np2'].forEach(i => $(i).value = ''); })
+    .withFailureHandler(e => m.textContent = e.message).changeMyPassword(S.token, $('op').value, $('np').value);
+}
+
+function loadUsers(){
+  run().withSuccessHandler(us => {
+    $('users').innerHTML = us.map(u => '<div class="u"><span><b>' + esc(u.id) + '</b> <small>' + esc(u.role) + (u.active ? '' : ' · 중지') + '</small></span>'
+      + (u.role === '마스터' ? '' : '<span><button onclick="setRole(\'' + esc(u.id) + '\',\'' + (u.role === '편집자' ? '열람자' : '편집자') + '\')">' + (u.role === '편집자' ? '열람자로' : '편집자로') + '</button><button onclick="resetPw(\'' + esc(u.id) + '\')">비번 초기화</button>'
+      + '<button onclick="toggle(\'' + esc(u.id) + '\',' + !u.active + ')">' + (u.active ? '중지' : '재개') + '</button></span>') + '</div>').join('');
+  }).withFailureHandler(fail).listUsers(S.token);
+}
+function addUser(){
+  const m = $('merr'); m.className = 'err';
+  run().withSuccessHandler(() => { m.className = 'err ok'; m.textContent = '추가되었습니다.'; $('nid').value = ''; $('npw').value = ''; loadUsers(); })
+    .withFailureHandler(e => m.textContent = e.message).addUser(S.token, $('nid').value, $('npw').value, $('nrole').value);
+}
+function toggle(id, on){ run().withSuccessHandler(loadUsers).withFailureHandler(fail).setUserActive(S.token, id, on); }
+function resetPw(id){
+  const pw = prompt(id + ' 의 새 비밀번호 (8자 이상)');
+  if (pw) run().withSuccessHandler(() => alert('초기화되었습니다.')).withFailureHandler(fail).resetUserPassword(S.token, id, pw);
+}
+function setRole(id, role){
+  if (confirm(id + ' 계정을 ' + role + ' 권한으로 변경합니까?\n(해당 사용자가 다시 로그인하면 적용됩니다.)'))
+    run().withSuccessHandler(loadUsers).withFailureHandler(fail).setUserRole(S.token, id, role);
+}
+
+/* ---------- 명단 추가·수정·삭제 ---------- */
+function fillLists(){
+  const uniq = f => [...new Set(f)].filter(Boolean).sort((a,b) => a.localeCompare(b,'ko'));
+  const opt = a => a.map(x => '<option value="' + esc(x) + '">').join('');
+  $('dlCo').innerHTML = opt(uniq(DATA.map(p => p['업체'])));
+  $('dlRank').innerHTML = opt(uniq(RANK.concat(DATA.map(p => p['직급']))));
+  $('dlSc').innerHTML = opt(uniq(DATA.flatMap(p => String(p['출신학교'] || '').split('/').map(s => s.trim()))));
+}
+function autoZ(){
+  const y = $('e_년생').value;
+  if (/^\d{2}$/.test(y)) $('e_띠').value = ZODIAC[(1900 + Number(y) - 4) % 12];
+}
+function openEdit(no){
+  EDIT = no ? DATA.find(p => String(p['순번']) === String(no)) : null;
+  if (no && !EDIT) { alert('자료를 찾을 수 없습니다. 새로고침 후 다시 시도하십시오.'); return; }
+  fillLists();
+  FIELDS.forEach(k => $('e_' + k).value = EDIT ? (EDIT[k] || '') : '');
+  $('e_빠른년생').checked = !!EDIT && EDIT['빠른년생'] === 'Y';
+  $('eTitle').textContent = EDIT ? '명단 수정 (순번 ' + EDIT['순번'] + ')' : '명단 추가';
+  $('eDel').classList.toggle('hide', !EDIT);
+  $('eerr').className = 'err'; $('eerr').textContent = '';
+  show('vEdit');
+}
+function afterSave(d, msg){ DATA = d; render(); show('vMain'); alert(msg); }
+function saveEdit(){
+  const p = {};
+  FIELDS.forEach(k => p[k] = $('e_' + k).value.trim());
+  p['빠른년생'] = $('e_빠른년생').checked ? 'Y' : '';
+  if (EDIT) p['순번'] = EDIT['순번'];
+  $('eerr').textContent = '저장 중...';
+  run().withSuccessHandler(d => afterSave(d, '저장되었습니다.'))
+    .withFailureHandler(e => { $('eerr').textContent = e.message; if (/로그인|세션/.test(e.message)) fail(e); })
+    .saveRow(S.token, p, EDIT);
+}
+function delEdit(){
+  if (!EDIT || !confirm(EDIT['성명'] + ' (' + EDIT['업체'] + ') 자료를 삭제합니까?\n삭제 내역은 [수정이력] 시트에 남습니다.')) return;
+  $('eerr').textContent = '삭제 중...';
+  run().withSuccessHandler(d => afterSave(d, '삭제되었습니다.'))
+    .withFailureHandler(e => { $('eerr').textContent = e.message; if (/로그인|세션/.test(e.message)) fail(e); })
+    .deleteRow(S.token, EDIT['순번'], EDIT);
+}
+</script>
+</body>
+</html>
