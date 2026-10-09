@@ -13,7 +13,13 @@
 | `claude-launcher.sh` | macOS·Linux·WSL용입니다. |
 
 ## 3. 실행 방법
-- Windows: 작업 폴더에서 `claude-launcher.cmd`를 실행합니다.
+- Windows 설치(최초 1회): PowerShell에 아래 한 줄을 붙여넣습니다.
+  ```powershell
+  irm https://raw.githubusercontent.com/ljg719-afk/-/claude/relaxed-hamilton-cdii2m/tools/claude-launcher/install-windows.ps1 | iex
+  ```
+- 설치 위치는 `%USERPROFILE%\claude-launcher`입니다. 이 폴더가 사용자 PATH에 추가됩니다.
+- 설치 후 어느 폴더에서든 `claude-launcher`를 입력합니다.
+- 설치하지 않은 경우: 파일이 있는 폴더에서 `.\claude-launcher.cmd`로 실행합니다. PowerShell은 현재 폴더의 파일을 `.\` 없이 실행하지 않습니다.
 - macOS·Linux: 작업 폴더에서 `bash claude-launcher.sh`를 실행합니다.
 - 실행한 위치가 작업 폴더가 됩니다. 메뉴 `D`에서 바꿀 수 있습니다.
 
