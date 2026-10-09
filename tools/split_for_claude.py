@@ -2,13 +2,14 @@
 """
 Claude 컨텍스트 첨부용 파일 분할 스크립트 (원본은 수정하지 않음)
 
-- PDF : 페이지 단위로 분할하여 각 파일을 30MB 이하로 저장
-- 그 외: 30MB 이하 파일은 그대로 복사, 초과 파일은 목록에 보고
+- PDF : 페이지 단위로 분할하여 각 파일을 기준 용량(기본 10MB) 이하로 저장
+- 그 외: 기준 이하 파일은 그대로 복사, 초과 파일은 목록에 보고
 - 결과: 원본 폴더 옆 "<폴더명>_분할본" 폴더에 저장
 
 사용법 (Windows 명령 프롬프트):
     pip install pypdf
     python split_for_claude.py "C:\\Users\\Dddd5\\OneDrive\\문서\\제혜영\\00  2027년 적용예정 표준교재"
+    python split_for_claude.py "<폴더 경로>" 30     (기준 용량 MB 지정, 생략 시 10MB)
 """
 import io
 import shutil
@@ -17,7 +18,7 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
-LIMIT_MB = 30
+LIMIT_MB = 10
 LIMIT = LIMIT_MB * 1024 * 1024
 SAFETY = 0.95  # 저장 시 오버헤드 대비 여유분
 
@@ -41,7 +42,7 @@ def split_pdf(src, out_dir):
     total = len(reader.pages)
     parts, start = [], 0
     while start < total:
-        # 이진 탐색으로 30MB 이하가 되는 최대 페이지 수 결정
+        # 이진 탐색으로 기준 용량 이하가 되는 최대 페이지 수 결정
         lo, hi, best = start + 1, total, None
         while lo <= hi:
             mid = (lo + hi) // 2
@@ -51,10 +52,10 @@ def split_pdf(src, out_dir):
                 lo = mid + 1
             else:
                 hi = mid - 1
-        if best is None:  # 단일 페이지가 30MB 초과
+        if best is None:  # 단일 페이지가 기준 용량 초과
             size, data = writer_size(build(reader, start, start + 1))
             best = (start + 1, data)
-            print(f"  [경고] {start + 1}페이지 단독 {size / 1048576:.1f}MB (30MB 초과)")
+            print(f"  [경고] {start + 1}페이지 단독 {size / 1048576:.1f}MB ({LIMIT_MB}MB 초과)")
         end, data = best
         parts.append((start + 1, end, data))
         start = end
@@ -65,9 +66,13 @@ def split_pdf(src, out_dir):
 
 
 def main():
+    global LIMIT_MB, LIMIT
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
+    if len(sys.argv) > 2:
+        LIMIT_MB = float(sys.argv[2])
+        LIMIT = int(LIMIT_MB * 1024 * 1024)
     src_root = Path(sys.argv[1])
     out_root = src_root.parent / f"{src_root.name}_분할본"
     oversize = []
@@ -78,12 +83,12 @@ def main():
         print(f"{src.relative_to(src_root)} ({size / 1048576:.1f}MB)")
         if size <= LIMIT:
             shutil.copy2(src, out_dir / src.name)
-            print("  -> 30MB 이하, 그대로 복사")
+            print(f"  -> {LIMIT_MB}MB 이하, 그대로 복사")
         elif src.suffix.lower() == ".pdf":
             split_pdf(src, out_dir)
         else:
             oversize.append(src)
-            print("  -> 30MB 초과 비PDF 파일, 수동 처리 필요")
+            print(f"  -> {LIMIT_MB}MB 초과 비PDF 파일, 수동 처리 필요")
     print(f"\n완료: {out_root}")
     if oversize:
         print("수동 처리 필요 파일 (PDF로 변환 후 재실행 권장):")
