@@ -18,6 +18,7 @@
   irm https://raw.githubusercontent.com/ljg719-afk/-/claude/relaxed-hamilton-cdii2m/tools/claude-launcher/install-windows.ps1 | iex
   ```
 - 설치 위치는 `%USERPROFILE%\claude-launcher`입니다. 이 폴더가 사용자 PATH에 추가됩니다.
+- 본체 `.ps1`은 `lib` 하위 폴더에 둡니다. PATH 폴더에 `.ps1`이 있으면 PowerShell이 `.cmd`보다 먼저 실행하려다 실행 정책에 막힙니다.
 - 설치 후 어느 폴더에서든 `claude-launcher`를 입력합니다.
 - 설치하지 않은 경우: 파일이 있는 폴더에서 `.\claude-launcher.cmd`로 실행합니다. PowerShell은 현재 폴더의 파일을 `.\` 없이 실행하지 않습니다.
 - macOS·Linux: 작업 폴더에서 `bash claude-launcher.sh`를 실행합니다.
