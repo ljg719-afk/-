@@ -50,6 +50,36 @@
   .chk input{width:auto;margin:0}
   .row2{display:flex;gap:8px}.row2>*{flex:1}
   .btn.del{background:#b33}
+
+  /* ---------- PC 화면 (가로 900px 이상) ---------- */
+  .pc{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
+  .side{background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 3px #0001;max-height:calc(100vh - 190px);overflow:auto}
+  .gi{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;border:0;background:none;padding:8px 10px;border-radius:6px;font-size:14px;text-align:left;color:#1b2a4a;cursor:pointer}
+  .gi:hover{background:#eef1f6}
+  .gi.on{background:#1b2a4a;color:#fff}
+  .gi .n{background:#e3e7ee;color:#1b2a4a;border-radius:10px;padding:1px 8px;font-size:12px}
+  .gi.on .n{background:#fff;color:#1b2a4a}
+  .tw{background:#fff;border-radius:10px;box-shadow:0 1px 3px #0001;max-height:calc(100vh - 190px);overflow:auto}
+  table.t{width:100%;border-collapse:collapse;font-size:14px}
+  .t th{position:sticky;top:0;background:#1b2a4a;color:#fff;font-weight:600;text-align:left;padding:9px 10px;white-space:nowrap;cursor:pointer;user-select:none}
+  .t th.ns{cursor:default}
+  .t td{padding:8px 10px;border-bottom:1px solid #eef0f4;vertical-align:top}
+  .t tr:hover td{background:#f7f9fc}
+  .t td.nw{white-space:nowrap}
+  .t .eb{margin:0}
+  .t .note{margin:0}
+  @media (min-width:900px){
+    header h1{max-width:1240px;margin-left:auto;margin-right:auto}
+    .wrap{max-width:1280px;margin-left:auto;margin-right:auto}
+    .wrap{padding:16px 20px}
+    #vLogin .box{max-width:420px;margin:80px auto 0}
+    #vEdit .wrap,#vSet .wrap{max-width:760px}
+    .bar input{max-width:480px}
+    .bar{justify-content:space-between}
+    .tabs{margin-top:10px}
+    .tab{flex:none;padding:8px 22px}
+    button{cursor:pointer}
+  }
 </style>
 </head>
 <body>
@@ -139,6 +169,10 @@
 
 <script>
 let S = null, DATA = [], TAB = 'year', EDIT = null;
+let GSEL = '', SORT = { k: '성명', d: 1 };   // PC 화면: 선택 분류, 정렬 기준
+const MQ = window.matchMedia('(min-width: 900px)');
+const isPC = () => MQ.matches;
+MQ.addEventListener('change', () => { if (S) render(); });
 const FIELDS = ['업체','성명','직급','직책','년생','띠','출신학교','비고'];
 const ZODIAC = ['쥐띠','소띠','호랑이띠','토끼띠','용띠','뱀띠','말띠','양띠','원숭이띠','닭띠','개띠','돼지띠'];
 const canEdit = () => S && (S.role === '마스터' || S.role === '편집자');
@@ -168,12 +202,12 @@ function fail(e){
 }
 function doLogout(local){
   if (S && !local) run().logout(S.token);
-  S = null; DATA = []; $('list').innerHTML = ''; show('vLogin');
+  S = null; DATA = []; GSEL = ''; $('list').innerHTML = ''; show('vLogin');
 }
 
 function setTab(b){
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-  b.classList.add('on'); TAB = b.dataset.k; render();
+  b.classList.add('on'); TAB = b.dataset.k; GSEL = ''; render();
 }
 
 function keys(p){
@@ -193,6 +227,7 @@ function render(){
   else if (TAB === 'rank') ks.sort((a,b) => (RANK.indexOf(a)+99)%99 - (RANK.indexOf(b)+99)%99);
   else ks.sort((a,b) => g[b].length - g[a].length || a.localeCompare(b,'ko'));
   $('cnt').textContent = '조회 ' + rows.length + '명 · ' + ks.length + '개 분류';
+  if (isPC()) { renderPC(rows, g, ks); return; }
   $('list').innerHTML = ks.map(k => {
     const ps = g[k].sort((a,b) => a['성명'].localeCompare(b['성명'],'ko'));
     return '<div class="grp' + (q ? ' open' : '') + '"><div class="gh" onclick="this.parentNode.classList.toggle(\'open\')">'
@@ -200,6 +235,40 @@ function render(){
       + ps.map(card).join('') + '</div></div>';
   }).join('');
 }
+
+/* ---------- PC 화면: 좌측 분류 목록 + 우측 명단 표 ---------- */
+const COLS = ['성명','직급','직책','업체','년생','띠','출신학교','비고'];
+function cmp(a, b, k){
+  if (k === '년생') return Number(a[k]) - Number(b[k]);
+  if (k === '직급') return (RANK.indexOf(a[k])+99)%99 - (RANK.indexOf(b[k])+99)%99;
+  return String(a[k] || '').localeCompare(String(b[k] || ''), 'ko');
+}
+function renderPC(rows, g, ks){
+  if (GSEL && !g[GSEL]) GSEL = '';
+  const gi = (k, label, n) => '<button class="gi' + (k === GSEL ? ' on' : '') + '" data-g="' + esc(k) + '" onclick="pickG(this)"><span>'
+    + esc(label) + '</span><span class="n">' + n + '</span></button>';
+  const ps = (GSEL ? g[GSEL] : rows).slice()
+    .sort((a,b) => cmp(a, b, SORT.k) * SORT.d || cmp(a, b, '성명'));
+  const th = COLS.map(k => '<th onclick="sortBy(\'' + k + '\')">' + k + (SORT.k === k ? (SORT.d > 0 ? ' ▲' : ' ▼') : '') + '</th>').join('')
+    + (canEdit() ? '<th class="ns"></th>' : '');
+  const tr = ps.map(p => '<tr>'
+    + '<td class="nw"><b>' + esc(p['성명']) + '</b>' + (p['빠른년생'] === 'Y' ? '<span class="bd q">빠른</span>' : '') + '</td>'
+    + '<td class="nw">' + esc(p['직급']) + '</td>'
+    + '<td class="nw">' + (p['직책'] ? '<span class="bd">' + esc(p['직책']) + '</span>' : '') + '</td>'
+    + '<td>' + esc(p['업체']) + '</td>'
+    + '<td class="nw">' + esc(p['년생']) + '년생 (' + age(p['년생']) + '세)</td>'
+    + '<td class="nw">' + esc(p['띠']) + '</td>'
+    + '<td>' + (p['출신학교'] ? '<span class="sc">' + esc(p['출신학교']) + '</span>' : '<span class="sc no">미확인</span>') + '</td>'
+    + '<td>' + (p['비고'] ? '<div class="note">' + esc(p['비고']) + '</div>' : '') + '</td>'
+    + (canEdit() ? '<td class="nw"><button class="eb" onclick="openEdit(\'' + esc(p['순번']) + '\')">수정</button></td>' : '')
+    + '</tr>').join('');
+  $('list').innerHTML = '<div class="pc"><div class="side">' + gi('', '전체', rows.length)
+    + ks.map(k => gi(k, k, g[k].length)).join('') + '</div>'
+    + '<div class="tw"><table class="t"><thead><tr>' + th + '</tr></thead><tbody>'
+    + (tr || '<tr><td colspan="' + (COLS.length + 1) + '">조회 결과가 없습니다.</td></tr>') + '</tbody></table></div></div>';
+}
+function pickG(b){ GSEL = b.dataset.g; render(); }
+function sortBy(k){ SORT = { k: k, d: SORT.k === k ? -SORT.d : 1 }; render(); }
 
 function card(p){
   const bd = (p['직책'] ? '<span class="bd">' + esc(p['직책']) + '</span>' : '')
